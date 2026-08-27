@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>More</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #14121f;
+    --bg-soft: #1a1730;
+    --card: #1f1b33;
+    --card-raised: #2a2444;
+    --card-border: rgba(255,255,255,0.09);
+    --accent: #ffb238;
+    --accent-dim: #8a6321;
+    --text: #f2efea;
+    --text-muted: #9c97b8;
+    --text-faint: #6a648c;
+    --radius: 18px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background:
+      radial-gradient(circle at 15% 8%, rgba(255,178,56,0.07), transparent 40%),
+      radial-gradient(circle at 85% 92%, rgba(108,99,255,0.08), transparent 45%),
+      var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif;
+    padding: 56px 20px 80px;
+  }
+
+  .wrap { max-width: 880px; margin: 0 auto; }
+
+  header.page-head { margin-bottom: 44px; }
+  .eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    letter-spacing: 0.14em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin: 0 0 10px;
+  }
+  h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: clamp(32px, 5vw, 46px);
+    line-height: 1.05;
+    margin: 0 0 12px;
+    letter-spacing: -0.01em;
+  }
+  .page-head p {
+    color: var(--text-muted);
+    font-size: 15.5px;
+    max-width: 46ch;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 18px;
+  }
+
+  .card {
+    position: relative;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 24px 22px 22px;
+    cursor: pointer;
+    text-align: left;
+    color: inherit;
+    font: inherit;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-height: 160px;
+    transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+    opacity: 0;
+    transform: translateY(10px);
+    animation: rise 0.5s ease forwards;
+  }
+  .card:nth-of-type(1){ animation-delay: 0.04s; }
+  .card:nth-of-type(2){ animation-delay: 0.12s; }
+  .card:nth-of-type(3){ animation-delay: 0.20s; }
+  @keyframes rise { to { opacity: 1; transform: translateY(0); } }
+
+  .card:not(.ghost):hover {
+    transform: translateY(-3px);
+    border-color: rgba(255,178,56,0.35);
+    background: var(--card-raised);
+  }
+  .card:not(.ghost):focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+
+  .card .no {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--text-faint);
+    letter-spacing: 0.08em;
+  }
+  .card .icon {
+    width: 34px; height: 34px;
+    border-radius: 9px;
+    background: rgba(255,178,56,0.12);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px;
+  }
+  .card h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 19px;
+    margin: 0;
+    font-weight: 700;
+  }
+  .card p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 13.5px;
+    line-height: 1.5;
+    flex-grow: 1;
+  }
+  .card .open-hint {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+  }
+
+  .card.ghost {
+    cursor: default;
+    border-style: dashed;
+    border-color: rgba(255,255,255,0.14);
+    background: transparent;
+    align-items: flex-start;
+    justify-content: center;
+  }
+  .card.ghost .plus {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 26px;
+    color: var(--text-faint);
+  }
+  .card.ghost p { color: var(--text-faint); }
+
+  /* ---------- overlay / opened card ---------- */
+  .overlay {
+    position: fixed; inset: 0;
+    background: rgba(10,9,17,0.72);
+    backdrop-filter: blur(3px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    z-index: 40;
+  }
+  .overlay.open { opacity: 1; pointer-events: auto; }
+
+  .ticket {
+    width: 100%; max-width: 420px;
+    background: var(--card-raised);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    box-shadow: 0 30px 70px rgba(0,0,0,0.5);
+    transform: scale(0.94) translateY(8px);
+    transition: transform 0.25s cubic-bezier(.2,.9,.3,1.2);
+    overflow: hidden;
+  }
+  .overlay.open .ticket { transform: scale(1) translateY(0); }
+
+  .ticket-head {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    padding: 22px 26px 0;
+  }
+  .ticket-head .eyebrow { margin: 0 0 4px; }
+  .ticket-head h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 22px;
+    margin: 0;
+  }
+  .close-btn {
+    background: none; border: none; color: var(--text-faint);
+    font-size: 20px; cursor: pointer; line-height: 1;
+    padding: 4px 6px; border-radius: 6px;
+  }
+  .close-btn:hover { color: var(--text); background: rgba(255,255,255,0.06); }
+  .close-btn:focus-visible { outline: 2px solid var(--accent); }
+
+  .ticket-body { padding: 20px 28px 28px; }
+
+  .field label {
+    display: block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+  }
+  .field input {
+    width: 100%;
+    background: var(--bg-soft);
+    border: 1px solid var(--card-border);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 18px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    outline: none;
+  }
+  .field input:focus-visible { border-color: var(--accent); }
+  .field-hint {
+    font-size: 12px; color: var(--text-faint); margin-top: 6px;
+  }
+  .field-hint.error { color: #ff8a8a; }
+
+  .draw-btn {
+    width: 100%;
+    margin-top: 16px;
+    background: var(--accent);
+    color: #241a05;
+    border: none;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    padding: 13px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.12s ease, background 0.12s ease;
+  }
+  .draw-btn:hover { background: #ffc460; }
+  .draw-btn:active { transform: scale(0.98); }
+  .draw-btn:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  .draw-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  /* perforated tear */
+  .tear {
+    position: relative;
+    border-top: 2px dashed var(--card-border);
+    margin: 24px -28px 0;
+  }
+  .tear::before, .tear::after {
+    content: "";
+    position: absolute; top: -11px;
+    width: 22px; height: 22px;
+    background: var(--bg);
+    border-radius: 50%;
+  }
+  .tear::before { left: -11px; }
+  .tear::after { right: -11px; }
+
+  .result-zone {
+    padding-top: 22px;
+    text-align: center;
+    min-height: 128px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 6px;
+  }
+  .result-zone .placeholder {
+    color: var(--text-faint);
+    font-size: 13.5px;
+  }
+  .result-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px;
+    letter-spacing: 0.14em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+  .result-number {
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+    font-size: 64px;
+    line-height: 1;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+  .result-sub {
+    font-size: 13.5px;
+    color: var(--text-muted);
+  }
+  .result-number.settled {
+    animation: settle 0.32s ease;
+  }
+  @keyframes settle {
+    0% { transform: scale(1.16); }
+    100% { transform: scale(1); }
+  }
+
+  /* ---------- mood -> song tool ---------- */
+  .mood-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .mood-chip {
+    background: var(--bg-soft);
+    border: 1px solid var(--card-border);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    padding: 12px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .mood-chip:hover { border-color: rgba(255,178,56,0.4); background: var(--card-raised); }
+  .mood-chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .song-result { text-align: center; }
+  .song-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 26px;
+    color: var(--text);
+    margin: 4px 0 2px;
+    line-height: 1.2;
+  }
+  .song-title.settled { animation: settle 0.32s ease; }
+  .song-by {
+    font-size: 13.5px;
+    color: var(--accent);
+  }
+  .song-note {
+    margin-top: 10px;
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  .song-player {
+    width: 100%;
+    max-width: 340px;
+    margin: 14px auto 0;
+    aspect-ratio: 16 / 9;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--card-border);
+    background: #000;
+  }
+  .song-player iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+  }
+  .song-link {
+    display: inline-block;
+    margin-top: 10px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px;
+    letter-spacing: 0.04em;
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .song-link:hover { text-decoration: underline; }
+
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 18px;
+  }
+  .btn-secondary {
+    flex: 1;
+    background: transparent;
+    border: 1px solid var(--card-border);
+    color: var(--text);
+    padding: 11px;
+    border-radius: 10px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+  .btn-secondary:hover { border-color: rgba(255,178,56,0.4); color: var(--accent); }
+  .btn-secondary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card, .ticket, .overlay, .result-number.settled, .song-title.settled { animation: none !important; transition: none !important; }
+  }
+
+  footer {
+    text-align: center;
+    margin-top: 56px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px;
+    color: var(--text-faint);
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="page-head">
+    <p class="eyebrow">Rukku timeeeeee 🐢</p>
+    <h1>Things when i am not around you....</h1>
+    <p>i want to make this website that helps you soo muje kuch bhi aisa milega jo teri help kar sakta h vo mea yha per add kar diya karunga jisse jab mea tere sath bhi na hu tab bhi tere sath rahu.....</p>
+  </header>
+
+  <div class="grid" id="cardGrid"></div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="ticket" role="dialog" aria-modal="true" aria-labelledby="ticketTitle">
+    <div class="ticket-head">
+      <div>
+        <p class="eyebrow">No. 01 — Ak number choose kar</p>
+        <h2 id="ticketTitle">Draw a number</h2>
+      </div>
+      <button class="close-btn" id="closeBtn" aria-label="Close">&times;</button>
+    </div>
+    <div class="ticket-body">
+      <div class="field">
+        <label for="choiceCount">Acha bata kitne number me se choose karna h ?</label>
+        <input type="number" id="choiceCount" min="2" max="999" placeholder="e.g. 4" inputmode="numeric">
+        <p class="field-hint" id="fieldHint">vaise anshu se directly kyu nhi bol rhi choose karne ko .. ladai hui h kya ? yaa offline bhoot banke gayab h </p>
+      </div>
+      <button class="draw-btn" id="drawBtn">Draw a number</button>
+
+      <div class="tear"></div>
+      <div class="result-zone" id="resultZone">
+        <p class="placeholder">Ye le ... vaise kya tha ? </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="moodOverlay">
+  <div class="ticket" role="dialog" aria-modal="true" aria-labelledby="moodTicketTitle">
+    <div class="ticket-head">
+      <div>
+        <p class="eyebrow">No. 02 — Gaane ka Mood</p>
+        <h2 id="moodTicketTitle">Mood bata, gaana milega</h2>
+      </div>
+      <button class="close-btn" id="closeMoodBtn" aria-label="Close">&times;</button>
+    </div>
+    <div class="ticket-body">
+      <div id="moodChipsView">
+        <div class="field">
+          <label>Abhi kaisa feel ho raha hai?</label>
+        </div>
+        <div class="mood-grid" id="moodGrid"></div>
+      </div>
+
+      <div id="moodResultView" style="display:none;">
+        <div class="tear" style="margin-top:0;"></div>
+        <div class="result-zone song-result" id="moodResultZone"></div>
+        <div class="btn-row">
+          <button class="btn-secondary" id="shuffleSongBtn">Ek aur try kar</button>
+          <button class="btn-secondary" id="changeMoodBtn">Mood badal</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>DO what you want to do</footer>
+
+<script>
+  // ---- Tool registry: add future features here ----
+  const tools = [
+    {
+      id: 'pick-number',
+      icon: '🎟️',
+      no: 'No. 01',
+      title: 'Pick My Number',
+      desc: 'Enter how many choices you have and let a random draw settle it.',
+      open: openPickNumber
+    },
+    {
+      id: 'mood-song',
+      icon: '🎧',
+      no: 'No. 02',
+      title: 'Gaane ka Mood',
+      desc: 'Apna mood bata, ussi ke hisaab se ek gaana suggest karta hu.',
+      open: openMoodSong
+    }
+    // Future tools go here, e.g.:
+    // { id: 'coin-flip', icon: '🪙', no: 'No. 03', title: 'Coin Flip', desc: '...', open: openCoinFlip }
+  ];
+
+  const grid = document.getElementById('cardGrid');
+
+  tools.forEach(tool => {
+    const btn = document.createElement('button');
+    btn.className = 'card';
+    btn.innerHTML = `
+      <span class="no">${tool.no}</span>
+      <span class="icon">${tool.icon}</span>
+      <h3>${tool.title}</h3>
+      <p>${tool.desc}</p>
+      <span class="open-hint">Open card →</span>
+    `;
+    btn.addEventListener('click', tool.open);
+    grid.appendChild(btn);
+  });
+
+  const ghost = document.createElement('div');
+  ghost.className = 'card ghost';
+  ghost.innerHTML = `<span class="plus">+</span><p>Next decision tool goes here.</p>`;
+  grid.appendChild(ghost);
+
+  // ---- Pick My Number tool ----
+  const overlay = document.getElementById('overlay');
+  const closeBtn = document.getElementById('closeBtn');
+  const choiceInput = document.getElementById('choiceCount');
+  const drawBtn = document.getElementById('drawBtn');
+  const fieldHint = document.getElementById('fieldHint');
+  const resultZone = document.getElementById('resultZone');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function openPickNumber() {
+    overlay.classList.add('open');
+    resultZone.innerHTML = '<p class="placeholder">Your number will land here.</p>';
+    fieldHint.textContent = 'vaise anshu se directly kyu nhi bol rhi choose karne ko .. ladai hui h kya ? yaa offline bhoot banke gayab h .';
+    fieldHint.classList.remove('error');
+    choiceInput.value = '';
+    setTimeout(() => choiceInput.focus(), 150);
+  }
+
+  function closeOverlay() {
+    overlay.classList.remove('open');
+  }
+  closeBtn.addEventListener('click', closeOverlay);
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeOverlay(); });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && overlay.classList.contains('open')) closeOverlay();
+  });
+
+  drawBtn.addEventListener('click', () => {
+    const n = parseInt(choiceInput.value, 10);
+    if (!n || n < 2) {
+      fieldHint.textContent = 'vaise anshu se directly kyu nhi bol rhi choose karne ko .. ladai hui h kya ? yaa offline bhoot banke gayab h ';
+      fieldHint.classList.add('error');
+      choiceInput.focus();
+      return;
+    }
+    fieldHint.classList.remove('error');
+    fieldHint.textContent = 'vaise anshu se directly kyu nhi bol rhi choose karne ko .. ladai hui h kya ? yaa offline bhoot banke gayab h ';
+    drawResult(n);
+  });
+
+  choiceInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') drawBtn.click();
+  });
+
+  function drawResult(n) {
+    const finalPick = Math.floor(Math.random() * n) + 1;
+    drawBtn.disabled = true;
+
+    resultZone.innerHTML = `
+      <p class="result-label">Vaise kya tha </p>
+      <p class="result-number" id="numDisplay">–</p>
+      <p class="result-sub" id="resultSub">&nbsp;</p>
+    `;
+    const numDisplay = document.getElementById('numDisplay');
+    const resultSub = document.getElementById('resultSub');
+
+    if (reduceMotion) {
+      numDisplay.textContent = finalPick;
+      resultSub.textContent = `Out of ${n} options — go with #${finalPick}.`;
+      drawBtn.disabled = false;
+      return;
+    }
+
+    let ticks = 0;
+    const totalTicks = 16 + Math.floor(Math.random() * 6);
+    let delay = 45;
+
+    function tick() {
+      numDisplay.textContent = Math.floor(Math.random() * n) + 1;
+      ticks++;
+      if (ticks < totalTicks) {
+        delay *= 1.13;
+        setTimeout(tick, delay);
+      } else {
+        numDisplay.textContent = finalPick;
+        numDisplay.classList.add('settled');
+        resultSub.textContent = `Out of ${n} options — go with #${finalPick}.`;
+        drawBtn.disabled = false;
+      }
+    }
+    tick();
+  }
+
+  // ---- Gaane ka Mood tool ----
+  const moodSongs = {
+    happy: {
+      label: 'Happy',
+      emoji: '😄',
+      songs: [
+        { title: 'Gallan Goodiyaan', by: 'Dil Dhadakne Do', note: 'Full dhamaal, sabko naacha degi.', videoId: 'jCEdTq3j-0U' },
+        { title: 'Badtameez Dil', by: 'Yeh Jawaani Hai Deewani', note: 'Bas volume upar kar de.', videoId: 'A1VTaAYH3Hc' }
+      ]
+    },
+    sad: {
+      label: 'Sad',
+      emoji: '😔',
+      songs: [
+        { title: 'Channa Mereya', by: 'Ae Dil Hai Mushkil', note: 'Ro le thoda, achha lagega.', videoId: '284Ov7ysmfA' },
+        { title: 'Someone Like You', by: 'Adele', note: 'Emotional damage, but worth it.', videoId: 'hLQl3WQQoQ0' }
+      ]
+    },
+    chill: {
+      label: 'Chill',
+      emoji: '😌',
+      songs: [
+        { title: 'Kun Faya Kun', by: 'Rockstar', note: 'Sukoon chahiye to yehi h.', videoId: '27CBPR7CSks' },
+        { title: 'Riptide', by: 'Vance Joy', note: 'Halka-phulka, easy sunday.', videoId: 'fS1AZ0i_X_8' }
+      ]
+    },
+    heartbreak: {
+      label: 'Heartbreak',
+      emoji: '💔',
+      songs: [
+        { title: 'Tum Hi Ho', by: 'Aashiqui 2', note: 'Classic, no explanation needed.', videoId: '81qmmlsIE3k' },
+        { title: 'Someone You Loved', by: 'Lewis Capaldi', note: 'Bring tissues.', videoId: 'zABLecsR5UE' }
+      ]
+    },
+    hyped: {
+      label: 'Hyped',
+      emoji: '🔥',
+      songs: [
+        { title: 'Malhari', by: 'Bajirao Mastani', note: 'Energy full on.', videoId: 'YUH9jD__qHY' },
+        { title: 'Believer', by: 'Imagine Dragons', note: 'Gym ho ya bas motivation chahiye.', videoId: '7wtfhZwyrcc' }
+      ]
+    },
+    romantic: {
+      label: 'Romantic',
+      emoji: '🥰',
+      songs: [
+        { title: 'Tum Se Hi', by: 'Jab We Met', note: 'Sabse safe romantic pick.', videoId: '55HzptaZbfk' },
+        { title: 'Perfect', by: 'Ed Sheeran', note: 'Har list me hona chahiye ye.', videoId: '2Vv-BfVoq4g' }
+      ]
+    },
+    nostalgic: {
+      label: 'Nostalgic',
+      emoji: '🕰️',
+      songs: [
+        { title: 'Kal Ho Naa Ho (Title Track)', by: 'Kal Ho Naa Ho', note: 'Har baar rulati h ye.', videoId: '2G-TmI4xsQU' },
+        { title: 'Yeh Dosti', by: 'Sholay', note: 'Dosti wale din yaad aa jayenge.', videoId: 'kYJxj_SIL1o' }
+      ]
+    }
+  };
+
+  const moodOverlay = document.getElementById('moodOverlay');
+  const closeMoodBtn = document.getElementById('closeMoodBtn');
+  const moodGrid = document.getElementById('moodGrid');
+  const moodChipsView = document.getElementById('moodChipsView');
+  const moodResultView = document.getElementById('moodResultView');
+  const moodResultZone = document.getElementById('moodResultZone');
+  const shuffleSongBtn = document.getElementById('shuffleSongBtn');
+  const changeMoodBtn = document.getElementById('changeMoodBtn');
+  let currentMoodKey = null;
+  let lastSongTitle = null;
+
+  Object.keys(moodSongs).forEach(key => {
+    const mood = moodSongs[key];
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'mood-chip';
+    chip.innerHTML = `<span aria-hidden="true">${mood.emoji}</span> ${mood.label}`;
+    chip.addEventListener('click', () => showSongForMood(key));
+    moodGrid.appendChild(chip);
+  });
+
+  function openMoodSong() {
+    moodOverlay.classList.add('open');
+    currentMoodKey = null;
+    lastSongTitle = null;
+    moodChipsView.style.display = '';
+    moodResultView.style.display = 'none';
+  }
+
+  function closeMoodOverlay() {
+    moodOverlay.classList.remove('open');
+    // stop any playing video by clearing the player out
+    moodResultZone.innerHTML = '';
+    moodResultView.style.display = 'none';
+    moodChipsView.style.display = '';
+    currentMoodKey = null;
+    lastSongTitle = null;
+  }
+  closeMoodBtn.addEventListener('click', closeMoodOverlay);
+  moodOverlay.addEventListener('click', e => { if (e.target === moodOverlay) closeMoodOverlay(); });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && moodOverlay.classList.contains('open')) closeMoodOverlay();
+  });
+
+  function pickSong(moodKey) {
+    const songs = moodSongs[moodKey].songs;
+    if (songs.length === 1) return songs[0];
+    let pick;
+    do {
+      pick = songs[Math.floor(Math.random() * songs.length)];
+    } while (pick.title === lastSongTitle && songs.length > 1);
+    return pick;
+  }
+
+  function showSongForMood(moodKey) {
+    currentMoodKey = moodKey;
+    const song = pickSong(moodKey);
+    lastSongTitle = song.title;
+    renderSong(song, moodSongs[moodKey].label);
+    moodChipsView.style.display = 'none';
+    moodResultView.style.display = '';
+  }
+
+  function renderSong(song, moodLabel) {
+    moodResultZone.innerHTML = `
+      <p class="result-label">For your ${moodLabel.toLowerCase()} mood</p>
+      <p class="song-title${reduceMotion ? '' : ' settled'}">${song.title}</p>
+      <p class="song-by">${song.by}</p>
+      <div class="song-player">
+        <iframe
+          src="https://www.youtube-nocookie.com/embed/${song.videoId}?autoplay=1&rel=0"
+          title="${song.title}"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+        ></iframe>
+      </div>
+      <p class="song-note">${song.note}</p>
+      <a class="song-link" href="https://www.youtube.com/watch?v=${song.videoId}" target="_blank" rel="noopener">Video na chale to yaha khol le ↗</a>
+    `;
+  }
+
+  shuffleSongBtn.addEventListener('click', () => {
+    if (!currentMoodKey) return;
+    const song = pickSong(currentMoodKey);
+    lastSongTitle = song.title;
+    renderSong(song, moodSongs[currentMoodKey].label);
+  });
+
+  changeMoodBtn.addEventListener('click', () => {
+    currentMoodKey = null;
+    lastSongTitle = null;
+    moodResultZone.innerHTML = '';
+    moodResultView.style.display = 'none';
+    moodChipsView.style.display = '';
+  });
+</script>
+
+</body>
+</html>
