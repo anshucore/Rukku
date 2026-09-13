@@ -908,7 +908,7 @@
                   <!-- Handwritten note -->
                   <div
                     style="font-family: 'Caveat', cursive;"
-                    class="whitespace-pre-line text-center text-xl leading-relaxed text-[#ebe2da] sm:text-2xl"
+                    class="whitespace-pre-line text-center text-xl leading-relaxed text-[#4a3520] sm:text-2xl"
                     x-text="currentNote.content"
                   ></div>
 
@@ -1071,7 +1071,7 @@
                     <span class="truncate text-sm text-zinc-700 dark:text-zinc-200" x-text="note.content"></span>
                     <span class="flex-none text-xs text-zinc-400" x-text="openSavedNoteId === note.id ? '▲' : '▼'"></span>
                   </button>
-                  <div x-show="openSavedNoteId === note.id" class="bg-[#fdf6e3] px-4 py-4 dark:bg-[#2a2318]">
+                  <div x-show="openSavedNoteId === note.id" class="bg-[#fdf6e3] px-4 py-4 dark:bg-[#fbeedb]">
                     <img
                       x-show="note.image_url"
                       :src="note.image_url"
